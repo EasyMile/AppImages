@@ -1,10 +1,13 @@
 # This file is supposed to be sourced by each Recipe
 # that wants to use the functions contained herein
 # like so:
-# wget -q https://github.com/probonopd/AppImages/raw/master/functions.sh -O ./functions.sh
+# wget -q https://github.com/steeryio/AppImages/raw/{chset}/functions.sh -O ./functions.sh
 # . ./functions.sh
 
 # RECIPE=$(realpath "$0")
+
+# could be a branch, changeset or tag. Here a tag.
+APP_IMAGE_CHSET=steery-1
 
 git_pull_rebase_helper()
 {
@@ -23,7 +26,7 @@ patch_usr()
 # Download AppRun and make it executable
 get_apprun()
 {
-  wget -c https://github.com/probonopd/AppImageKit/releases/download/5/AppRun -O ./AppRun # 64-bit
+  wget -c https://github.com/steeryio/AppImageKit/releases/download/5/AppRun -O ./AppRun # 64-bit
   chmod a+x AppRun
 }
 
@@ -54,7 +57,7 @@ move_lib()
 # Delete blacklisted files
 delete_blacklisted()
 {
-  BLACKLISTED_FILES=$(wget -q https://github.com/probonopd/AppImages/raw/master/excludelist -O - | sed '/^\s*$/d' | sed '/^#.*$/d')
+  BLACKLISTED_FILES=$(wget -q https://github.com/steeryio/AppImages/raw/$APP_IMAGE_CHSET/excludelist -O - | sed '/^\s*$/d' | sed '/^#.*$/d')
   echo $BLACKLISTED_FILES
   for FILE in $BLACKLISTED_FILES ; do
     FOUND=$(find . -type f -name "${FILE}" 2>/dev/null)
@@ -74,7 +77,7 @@ glibc_needed()
 # Usage: get_desktopintegration name_of_desktop_file_and_exectuable
 get_desktopintegration()
 {
-  wget -O ./usr/bin/$1.wrapper https://raw.githubusercontent.com/probonopd/AppImageKit/master/desktopintegration
+  wget -O ./usr/bin/$1.wrapper https://raw.githubusercontent.com/steeryio/AppImageKit/$APP_IMAGE_CHSET/desktopintegration
   chmod a+x ./usr/bin/$1.wrapper
   sed -i -e "s|Exec=$1|Exec=$1.wrapper|g" $1.desktop
 }
@@ -89,7 +92,7 @@ generate_appimage()
   #   echo "" >> ./$APP.AppDir/Recipe
   #   cat $RECIPE >> ./$APP.AppDir/Recipe
   # fi
-  wget -c "https://github.com/probonopd/AppImageKit/releases/download/5/AppImageAssistant" # (64-bit)
+  wget -c "https://github.com/steeryio/AppImageKit/releases/download/5/AppImageAssistant" # (64-bit)
   chmod a+x ./AppImageAssistant
   mkdir -p ../out
   rm ../out/$APP"-"$VERSION"-x86_64.AppImage" || true
@@ -101,7 +104,7 @@ generate_appimage()
 # to be part of the base system
 generate_status()
 {
-  wget -q -c "https://github.com/probonopd/AppImages/raw/master/excludedeblist"
+  wget -q -c "https://github.com/steeryio/AppImages/raw/$APP_IMAGE_CHSET/excludedeblist"
   rm status || true
   for PACKAGE in $(cat excludedeblist | cut -d "#" -f 1) ; do
     printf "Package: $PACKAGE\nStatus: install ok installed\nArchitecture: all\nVersion: 9:9999.9999.9999\n\n" >> status
