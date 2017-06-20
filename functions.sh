@@ -7,7 +7,7 @@
 # RECIPE=$(realpath "$0")
 
 # could be a branch, changeset or tag. Here a tag.
-APP_IMAGE_CHSET=steery-1
+APP_IMAGE_CHSET=steery-2
 
 git_pull_rebase_helper()
 {
