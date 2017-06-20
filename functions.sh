@@ -1,10 +1,13 @@
 # This file is supposed to be sourced by each Recipe
 # that wants to use the functions contained herein
 # like so:
-# wget -q https://github.com/AppImage/AppImages/raw/master/functions.sh -O ./functions.sh
+# wget -q https://github.com/EasyMile/AppImages/raw/{chset}/functions.sh -O ./functions.sh
 # . ./functions.sh
 
 # RECIPE=$(realpath "$0")
+
+# could be a branch, changeset or tag.
+APP_IMAGE_CHSET=master
 
 # Options for apt-get to use local files rather than the system ones
 OPTIONS="-o Debug::NoLocking=1
@@ -48,8 +51,8 @@ patch_usr()
 # Download AppRun and make it executable
 get_apprun()
 {
-  # wget -c https://github.com/AppImage/AppImageKit/releases/download/5/AppRun -O ./AppRun # 64-bit
-  wget -c https://github.com/AppImage/AppImageKit/releases/download/continuous/AppRun-x86_64 -O AppRun # 64-bit
+  # wget -c https://github.com/EasyMile/AppImageKit/releases/download/5/AppRun -O ./AppRun # 64-bit
+  wget -c https://github.com/EasyMile/AppImageKit/releases/download/continuous/AppRun-x86_64 -O AppRun # 64-bit
   chmod a+x AppRun
 }
 
@@ -81,7 +84,7 @@ move_lib()
 # Delete blacklisted files
 delete_blacklisted()
 {
-  BLACKLISTED_FILES=$(cat_file_from_url https://github.com/AppImage/AppImages/raw/master/excludelist | sed 's|#.*||g')
+    BLACKLISTED_FILES=$(cat_file_from_url https://github.com/EasyMile/AppImages/raw/$APP_IMAGE_CHSET/excludelist | sed 's|#.*||g')
   echo $BLACKLISTED_FILES
   for FILE in $BLACKLISTED_FILES ; do
     FOUND=$(find . -xtype f -name "${FILE}" 2>/dev/null)
@@ -108,7 +111,7 @@ glibc_needed()
 get_desktopintegration()
 {
   REALBIN=$(grep -o "^Exec=.*" *.desktop | sed -e 's|Exec=||g' | cut -d " " -f 1 | head -n 1)
-  cat_file_from_url https://raw.githubusercontent.com/AppImage/AppImageKit/master/desktopintegration > ./usr/bin/$REALBIN.wrapper
+  cat_file_from_url https://raw.githubusercontent.com/EasyMile/AppImageKit/$APP_IMAGE_CHSET/desktopintegration > ./usr/bin/$REALBIN.wrapper
   chmod a+x ./usr/bin/$REALBIN.wrapper
 
   sed -i -e "s|^Exec=$REALBIN|Exec=$REALBIN.wrapper|g" $1.desktop
@@ -142,7 +145,7 @@ generate_appimage()
      exit 1
     fi
   fi
-  wget -c "https://github.com/AppImage/AppImageKit/releases/download/6/AppImageAssistant_6-x86_64.AppImage" -O  AppImageAssistant # (64-bit)
+  wget -c "https://github.com/EasyMile/AppImageKit/releases/download/6/AppImageAssistant_6-x86_64.AppImage" -O  AppImageAssistant # (64-bit)
   chmod a+x ./AppImageAssistant
   mkdir -p ../out || true
   rm ../out/$APP"-"$VERSION"-x86_64.AppImage" 2>/dev/null || true
@@ -166,7 +169,7 @@ generate_type2_appimage()
   chmod a+x ./appimagetool
   set +x
   if ( [ ! -z "$KEY" ] ) && ( ! -z "$TRAVIS" ) ; then
-    wget https://github.com/AppImage/AppImageKit/files/584665/data.zip -O data.tar.gz.gpg
+    wget https://github.com/EasyMile/AppImageKit/files/584665/data.zip -O data.tar.gz.gpg
     ( set +x ; echo $KEY | gpg2 --batch --passphrase-fd 0 --no-tty --skip-verify --output data.tar.gz --decrypt data.tar.gz.gpg )
     tar xf data.tar.gz
     sudo chown -R $USER .gnu*
@@ -190,7 +193,7 @@ generate_status()
   mkdir -p ./tmp/archives/
   mkdir -p ./tmp/lists/partial
   touch tmp/pkgcache.bin tmp/srcpkgcache.bin
-  wget -q -c "https://github.com/AppImage/AppImages/raw/master/excludedeblist"
+  wget -q -c "https://github.com/EasyMile/AppImages/raw/$APP_IMAGE_CHSET/excludedeblist"
   rm status 2>/dev/null || true
   for PACKAGE in $(cat excludedeblist | cut -d "#" -f 1) ; do
     printf "Package: $PACKAGE\nStatus: install ok installed\nArchitecture: all\nVersion: 9:999.999.999\n\n" >> status
